@@ -1,6 +1,6 @@
 --A BigInteger class for infinitly large integers
 --Works well for integers up to ~3000 digits, but is somewhat slow beyond that
---Credit (Please don't remove): Alexander Benlolo ... November 13, 2019 ... alexbenlolo@gmail.com
+--Credit (Please don't remove): Alexander Benlolo ... November 13, 2019 ... abenlo1@students.towson.edu
 local BigInteger = {}
 local mt = {__index = BigInteger}
 
