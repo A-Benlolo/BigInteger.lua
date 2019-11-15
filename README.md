@@ -1,7 +1,6 @@
 # BigBoiks
 A data type for Lua to overcome the upper limit of what a number can equal.
 
-Changes...
 November 13, 2019
 ==================
 *BigInteger file created
