@@ -1,39 +1,62 @@
 --A BigInteger class for infinitly large integers
 --Works well for integers up to ~3000 digits, but is somewhat slow beyond that
---Credit (Please don't remove): Alexander Benlolo ... November 13, 2019 ... abenlo1@students.towson.edu
+--Credit (Please don't remove): Alexander Benlolo ... November 14, 2019 ... alexbenlolo@gmail.com
 local BigInteger = {}
 local mt = {__index = BigInteger}
 
---Convert a character to a number if it is valid
-local function charToNum(c)
-  local temp=-1
-  if c=='0' then temp=0
-  elseif c=='1' then temp=1
-  elseif c=='2' then temp=2
-  elseif c=='3' then temp=3
-  elseif c=='4' then temp=4
-  elseif c=='5' then temp=5
-  elseif c=='6' then temp=6
-  elseif c=='7' then temp=7
-  elseif c=='8' then temp=8
-  elseif c=='9' then temp=9 end
-  assert(temp~=-1, "Invalid value: " .. c .. " is not a number.")
-  return temp
+--Convert a BigInteger to any base string up to 36
+local function decimalToNewBase(num, b)
+  local k, out, i, d="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", "", BigInteger:ZERO()
+  local temp=BigInteger:new(num:toString(), num.sign)
+  while temp:greaterThan(BigInteger.ZERO()) do
+    i=i:add(BigInteger.ONE())
+    temp, d = temp:divide(b), temp:mod(b):add(BigInteger.ONE())
+    out=string.sub(k, tonumber(d:toString()), tonumber(d:toString())) .. out
+  end
+  return out
 end
---
+
+--Convert a hex string to a BigInteger
+local function hexStringToDecimalString(num)
+  assert(type(num)=="string", "Invalid hexidecimal value.")
+
+  local sum=BigInteger.ZERO()
+  local newNum=BigInteger.ZERO()
+  local digit=string.upper(num)
+  local sixteen=BigInteger:new("16", '+')
+  local i=BigInteger.ONE()
+  local length=BigInteger:new(tostring(string.len(digit)), '+')
+  local c, pos
+
+  while not i:greaterThan(length) do
+    pos=tonumber(length:subtract(i):add(BigInteger.ONE()):toString())
+    c=string.sub(digit, pos, pos)
+    if c=="A" then newNum=BigInteger:new("10", '+')
+    elseif c=="B" then newNum=BigInteger:new("11", '+')
+    elseif c=="C" then newNum=BigInteger:new("12", '+')
+    elseif c=="D" then newNum=BigInteger:new("13", '+')
+    elseif c=="E" then newNum=BigInteger:new("14", '+')
+    elseif c=="F" then newNum=BigInteger:new("15", '+')
+    else newNum=BigInteger:new(c, '+') end
+    sum=sum:add(newNum:multiply(sixteen:pow(i:subtract(BigInteger.ONE()))))
+    i=i:add(BigInteger.ONE())
+  end
+
+  return sum:toString()
+end
+
 --Convert a string of numbers to a table
 local function stringToTable(num)
   assert(type(num)=="string", "Invalid value: " .. num .. " is not a string.")
   local temp={}
   for i=1, string.len(num) do
     if string.sub(num, i, i) ~= '-' then
-      temp[string.len(num)-i+1]=charToNum(string.sub(num, i, i))
+      temp[string.len(num)-i+1]=tonumber(string.sub(num, i, i))
     end
   end
-
   return temp
 end
---
+
 --Remove any trailing zeroes from a BigInteger
 local function removeTrailingZeroes(big)
   for i=#big.value, 1, -1 do
@@ -42,13 +65,16 @@ local function removeTrailingZeroes(big)
   end
   if big:toString()=="" then big.value={0} end
 end
---
---Create a new BigInteger
-function BigInteger:new(num, s)
-  assert(type(num)=="string", "Invalid value: " .. num .. " is not a string.")
-  assert(type(s)=="string" and (s == '+' or s == '-'), "Invalid sign") 
 
-  --Assign the data to this BigInteger
+--Create a new BigInteger
+function BigInteger:new(num, s, base)
+  assert(num~=nil and type(num)=="string", "Invalid value: " .. num .. " is not a string.")
+  assert(s~=nil and type(s)=="string" and (s == '+' or s == '-'), "Invalid sign.") 
+  assert(base==nil or (type(base)=="number" and (base==16 or base==10)), "Invalid base.")
+
+  --Convert from the proper base to decimal
+  if base==16 then num=hexStringToDecimalString(num) end
+
   return setmetatable({
       value=stringToTable(num),
       sign=s
@@ -56,7 +82,7 @@ function BigInteger:new(num, s)
     mt
   )
 end
---
+
 --Class Constants
 function BigInteger.ZERO() return BigInteger:new("0", '+') end
 function BigInteger.ONE() return BigInteger:new("1", '+') end
@@ -69,29 +95,30 @@ function BigInteger.SEVEN() return BigInteger:new("7", '+') end
 function BigInteger.EIGHT() return BigInteger:new("8", '+') end
 function BigInteger.NINE() return BigInteger:new("9", '+') end
 function BigInteger.TEN() return BigInteger:new("10", '+') end
---
+function BigInteger.SIXTEEN() return BigInteger:new("16", '+') end
+
 --Set the value of this BigInteger
 function BigInteger:setValue(num)
   assert(type(num)=="string", "Invalid value: ", num, " is not a string.")
   self.value=stringToTable(num)
 end
---
+
 --Set the sign of this BigInteger
 function BigInteger:setSign(s)
   assert(type(s)=="string" and (s == '+' or s == '-'), "Invalid sign: " .. s .. " is not +/-")
   self.sign=s
 end
---
+
 --Return the value of this BigInteger
 function BigInteger:getValue()
   return self:toString()
 end
---
+
 --Return the sign of this BigInteger
 function BigInteger:getSign()
   return self.sign
 end
---
+
 --Determine if a BigInteger is bigger than this BigInteger
 function BigInteger:greaterThan(num)
   --Try to determine based on the sign
@@ -110,7 +137,7 @@ function BigInteger:greaterThan(num)
   --If you got this far then the numbers are equal
   return false
 end
---
+
 --Determine if a BigInteger is smaller than this BigInteger
 function BigInteger:lessThan(num)
   --Try to determine based on sign
@@ -129,7 +156,7 @@ function BigInteger:lessThan(num)
   --If you got this far then the numbers are equal
   return false
 end
---
+
 --Determine if two BigIntegers are equal
 function BigInteger:equals(num)
   assert(type(num)=="table" and num.value~=nil and num.sign~=nil, "Failed to compare with " .. self:toString() .. ".")
@@ -140,7 +167,17 @@ function BigInteger:equals(num)
   end
   return true
 end
---
+
+--Determine if a BigInteger is greater than or equal to this BigInteger
+function BigInteger:greaterThanOrEqualTo(num)
+    return not self:lessThan(num)
+end
+
+--Determine if a BigInteger is less than or equal to this BigInteger
+function BigInteger:lessThanOrEqualTo(num)
+  return not self:greaterThan(num)
+end
+
 --Add two BigIntegers
 function BigInteger:add(num)
   assert(type(num)=="table" and num.value~=nil and num.sign~=nil, "Failed to add  to " .. self:toString() .. ".")
@@ -199,7 +236,7 @@ function BigInteger:add(num)
 
   return sum
 end
---
+
 --Subtract one BigInteger from another
 function BigInteger:subtract(num)
   assert(type(num)=="table" and num.value~=nil and num.sign~=nil, "Failed to subtract from " .. self:toString() .. ".")
@@ -253,7 +290,7 @@ function BigInteger:subtract(num)
 
   return diff
 end
---
+
 --Multiply two BigIntegers together
 function BigInteger:multiply(num)
   assert(type(num)=="table" and num.value~=nil and num.sign~=nil, "Failed to multiply " .. self:toString() .. ".")
@@ -301,7 +338,7 @@ function BigInteger:multiply(num)
 
   return prod
 end
---
+
 --Divide this BigInteger by another BigInteger
 function BigInteger:divide(num)
   assert(type(num)=="table" and num.value~=nil and num.sign~=nil, "Failed to divide " .. self:toString() .. ".")
@@ -352,7 +389,7 @@ function BigInteger:divide(num)
 
   return q, r
 end
---
+
 --Determine this BigInteger modulus another BigInteger
 function BigInteger:mod(num)
   assert(type(num)=="table" and num.value~=nil and num.sign~=nil and num.sign=='+', "Failed to modulo " .. self:toString() .. ".")
@@ -373,8 +410,8 @@ function BigInteger:mod(num)
   return r
 
 end
---
---Determine this BigInteger to the power of an INTEGER (not a BigInteger)
+
+--Determine this BigInteger to the power of another BigInteger
 function BigInteger:pow(num)
   assert(type(num)=="table" and num.value~=nil and num.sign~=nil and (num:greaterThan(BigInteger.ZERO()) or num:equals(BigInteger.ZERO())), "Failed to power " .. self:toString() .. ".")
 
@@ -390,8 +427,8 @@ function BigInteger:pow(num)
 
   return raised
 end
---
---Determine this BigInteger to the power of another BigInteger modulus a different BigInteger
+
+--Determine this BigInteger to the power of another BigInteger modulo a different BigInteger
 function BigInteger:modPow(p, m)
   assert(type(p)=="table" and p.value~=nil and p.sign~=nil and (p:greaterThan(BigInteger.ZERO()) or p:equals(BigInteger.ZERO())), "Invalid power to mod-pow " .. self:toString() .. ".")
   assert(type(m)=="table" and m.value~=nil and m.sign~=nil, "Invalid modulo to mod-pow " .. self:toString() .. ".")
@@ -437,7 +474,7 @@ function BigInteger:modPow(p, m)
   return ans
 
 end
---
+
 --Generate a random BigInteger 0 < rand < self
 function BigInteger:random()
   assert(self.sign=='+', "Max for random number must be positive.")
@@ -461,40 +498,48 @@ function BigInteger:random()
 
   return rand
 end
---
+
 --Get the absolute value of this BigInteger
 function BigInteger:abs()
   return BigInteger:new(self:toString(), '+')
 end
---
 --Determine the maximum value between two BigIntegers
 function BigInteger:max(num)
   assert(type(num)=="table" and num.value~=nil and num.sign~=nil, "Failed to compare with " .. self:toString() .. ".")
   if self:greaterThan(num) then return BigInteger:new(self:toString(), self.sign) end
   return BigInteger:new(num:toString(), num.sign)
 end
---
+
 --Return the minimum value between two BigIntegers
 function BigInteger:min(num)
   assert(type(num)=="table" and num.value~=nil and num.sign~=nil, "Failed to compare with " .. self:toString() .. ".")
   if self:lessThan(num) then return BigInteger:new(self:toString(), self.sign) end
   return BigInteger:new(num:toString(), num.sign)
 end
---
+
 --Return this BigInteger with a swapped sign
 function BigInteger:negate()
   if self.sign=='-' then return BigInteger:new(self:toString(), '+') end
   return BigInteger:new(self:toString(), '-')
 end
---
+
 --Return the BigInteger as a string
-function BigInteger:toString()
+function BigInteger:toString(base)
+  assert(base==nil or (type(base)=="number" and base>1 and base<=36), "Invalid base")
   local asString=""
-  for i=#self.value, 1, -1 do asString=asString .. self.value[i] end
+  
+  --Convert the table into a string in the proper base
+  if base==nil or base==10 then
+    for i=#self.value, 1, -1 do asString=asString .. self.value[i] end
+  else
+    asString=decimalToNewBase(self, BigInteger:new(tostring(base), '+'))
+  end
+  
+  --Return the string either with no sign or a negative sign
   if self.sign == '-' then
     return self.sign .. asString
   end
   return asString
 end
---
+
 return BigInteger
