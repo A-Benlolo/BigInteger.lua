@@ -23,6 +23,8 @@ local function main()
   local min=p:min(q)
   local negP=p:negate()
   local negQ=q:negate()
+  local gcd, s, t=absP:Euclidean(absQ)
+  local multInv=absQ:inverse(absP)
   
   --Expected Results
   local expectedSum=BigInteger:new("8633240", '-')
@@ -41,7 +43,6 @@ local function main()
   local expectedNegP=BigInteger:new("8675309", '+')
   local expectedToHex="123456789ABCDEF0"
   
-
   io.write(",----------------,\n")
   io.write("|    ADDITION    |\n")
   io.write("`----------------`\n")
@@ -121,6 +122,16 @@ local function main()
   io.write("Negation of ", p:toString(), " = ", negP:toString(), "\n")
   io.write("Negation of ", q:toString(), " = ", negQ:toString(), "\n\n")
   
+  io.write(",----------------,\n")
+  io.write("|    EUCLIDEAN   |\n")
+  io.write("`----------------`\n")
+  io.write(absP:toString(), "*", s:toString(), " + ", absQ:toString(), "*", t:toString(), " = ", absP:multiply(s):add(absQ:multiply(t)):toString(), "\n\n")
+  
+  io.write(",----------------,\n")
+  io.write("|   MULT. INV.   |\n")
+  io.write("`----------------`\n")
+  io.write(absQ:toString(), "*", multInv:toString(), " = ", multInv:multiply(absQ):mod(absP):toString(), " = ", BigInteger.ONE():toString(), "\n\n")
+  
   io.write(",~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~,\n")
   io.write("|               Results:               |\n")
   io.write("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n")
@@ -138,6 +149,8 @@ local function main()
   io.write(string.format("|%-30s : %-5s|\n", "Maximum Value Correct", (max:equals(expectedMax)) and "True" or "False"))
   io.write(string.format("|%-30s : %-5s|\n", "Minimum Value Correct", (min:equals(expectedMin)) and "True" or "False"))
   io.write(string.format("|%-30s : %-5s|\n", "Negation Correct", (negP:equals(expectedNegP) and negQ:equals(expectedNegQ)) and "True" or "False"))
+  io.write(string.format("|%-30s : %-5s|\n", "Euclidean Alogrithim Correct", (absP:multiply(s):add(absQ:multiply(t)):equals(gcd)) and "True" or "False"))
+  io.write(string.format("|%-30s : %-5s|\n", "Multiplicative Inverse Correct", (multInv:multiply(absQ):mod(absP):equals(BigInteger.ONE())) and "True" or "False"))
   io.write("`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`\n")
 end
 
