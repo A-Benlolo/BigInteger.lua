@@ -11,8 +11,14 @@ November 14, 2019
 *Added option to create a BigInteger from a hexidecimal string
 *Added new features to the demo file
 
+November 15, 2019
+=================
+*Added option to create a BigInteger from any base string 2-36
+*Added function to find a multiplicative inverse of a number modulo another number
+*Added option to raise a BigInteger to a number or another BigInteger
+*Increased effeciency by replacing BigInteger.ZERO() calls with a local variable in some functions
+
 Future Plans
 ============
-*Add option to create a BigInteger from a binary string
-*Add BigInteger:inverse(num) to find the multiplicative inverse of self modulo num
-*Add option to do BigInteger:pow(num) where type(num)=="number"
+*Add function to determine if a number is a probable prime
+*Implement bitwise operations
