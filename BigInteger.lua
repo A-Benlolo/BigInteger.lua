@@ -1,6 +1,6 @@
---A BigInteger class for arbitrarily large integers
+--A BigInteger class for arbitrarily long integers
 --Works well for integers up to ~3000 digits, but is somewhat slow beyond that
---Credit (Please don't remove): Alexander Benlolo ... November 15, 2019 ... alexbenlolo@gmail.com
+--Credit (Please don't remove): Alexander Benlolo ... November 17, 2019 ... alexbenlolo@gmail.com
 local BigInteger = {}
 local mt = {__index = BigInteger}
 
@@ -108,7 +108,7 @@ function BigInteger:new(num, s, base)
   )
 end
 
---Class Constants
+--Easy to create BigIntegers
 function BigInteger.ZERO() return BigInteger:new("0", '+') end
 function BigInteger.ONE() return BigInteger:new("1", '+') end
 function BigInteger.TWO() return BigInteger:new("2", '+') end
@@ -120,7 +120,20 @@ function BigInteger.SEVEN() return BigInteger:new("7", '+') end
 function BigInteger.EIGHT() return BigInteger:new("8", '+') end
 function BigInteger.NINE() return BigInteger:new("9", '+') end
 function BigInteger.TEN() return BigInteger:new("10", '+') end
-function BigInteger.SIXTEEN() return BigInteger:new("16", '+') end
+
+--Class constants
+local ZERO=BigInteger.ZERO()
+local ONE=BigInteger.ONE()
+local TWO=BigInteger.TWO()
+local THREE=BigInteger.THREE()
+local FOUR=BigInteger.FOUR()
+local FIVE=BigInteger.FIVE()
+local SIX=BigInteger.SIX()
+local SEVEN=BigInteger.SEVEN()
+local EIGHT=BigInteger.EIGHT()
+local NINE=BigInteger.NINE()
+local TEN=BigInteger.TEN()
+
 
 --Set the value of this BigInteger
 function BigInteger:setValue(num)
@@ -441,24 +454,20 @@ function BigInteger:pow(num)
   if self:equals(BigInteger.ZERO()) then return BigInteger.ZERO() end
 
   --The working data
-  local one, two=BigInteger.ONE(), BigInteger.TWO()
   local raised=BigInteger.ONE()
   local i
 
   --Do the repeated multiplication and correct the sign
   if type(num)=="table" then
     i=BigInteger.ONE()
-    while not i:greaterThan(num) do raised=raised:multiply(self) ; i=i:add(one) end
-    if self.sign=='-' and num:mod(two):equals(one) then raised.sign='-' end
+    while not i:greaterThan(num) do raised=raised:multiply(self) ; i=i:add(ONE) end
+    if self.sign=='-' and num:mod(TWO):equals(ONE) then raised.sign='-' end
   else
     i=1
     while i<=num do raised=raised:multiply(self) ; i=i+1 end
     if self.sign=='-' and num%2==1 then raised.sign='-' end
   end
-
-  --Assign the correct sign
-
-
+  
   return raised
 end
 
@@ -467,7 +476,6 @@ function BigInteger:modPow(p, m)
   assert(type(p)=="table" and p.value~=nil and p.sign~=nil and (p:greaterThan(BigInteger.ZERO()) or p:equals(BigInteger.ZERO())), "Invalid power to mod-pow " .. self:toString() .. ".")
   assert(type(m)=="table" and m.value~=nil and m.sign~=nil, "Invalid modulo to mod-pow " .. self:toString() .. ".")
 
-  local zero, one, two=BigInteger.ZERO(), BigInteger.ONE(), BigInteger.TWO()
   local counter=BigInteger.ONE()
   local power=BigInteger.ONE()
   local ans=BigInteger.ONE()
@@ -478,21 +486,21 @@ function BigInteger:modPow(p, m)
 
   --Find all the powers of two
   while not power:greaterThan(p) do
-    table.insert(values, values[#values]:pow(two):mod(m))
-    power=two:pow(counter)
-    counter=counter:add(one)
+    table.insert(values, values[#values]:pow(TWO):mod(m))
+    power=TWO:pow(counter)
+    counter=counter:add(ONE)
   end
 
   --Remove the last value, because it's one to high
   table.remove(values, #values)
 
   --Determine the binary representation of p
-  while workingPower:greaterThan(zero) do
-    rest=workingPower:mod(two)
-    if rest:equals(zero) then binary[#binary+1]=0
+  while workingPower:greaterThan(ZERO) do
+    rest=workingPower:mod(TWO)
+    if rest:equals(ZERO) then binary[#binary+1]=0
     else binary[#binary+1]=1 end
     workingPower=workingPower:subtract(rest)
-    workingPower=workingPower:divide(two)
+    workingPower=workingPower:divide(TWO)
   end
 
   --Swap the sign to positive as to not mess up the modulus
@@ -526,7 +534,7 @@ function BigInteger:random()
 
   --Make the random number 0 < rand < self
   rand=rand:mod(self)
-  if rand:equals(BigInteger.ZERO()) then rand=BigInteger.ONE() end
+  if rand:equals(ZERO) then rand=BigInteger.ONE() end
 
   --Remove any trailing zeroes
   removeTrailingZeroes(rand)
@@ -564,7 +572,6 @@ function BigInteger:Euclidean(num)
   assert(type(num)=="table" and num.value~=nil and num.sign~=nil, "Failed to Euclidiate " .. self:toString() .. ".")
 
   --The working data
-  local zero=BigInteger.ZERO()
   local x0, x1 = BigInteger.ONE(), BigInteger.ZERO()
   local y0, y1 = BigInteger.ZERO(), BigInteger.ONE()
   local a, b
@@ -586,12 +593,12 @@ function BigInteger:Euclidean(num)
     a=BigInteger:new(b:toString(), b.sign)
     x0=BigInteger:new(x1:toString(), x1.sign)
     y0=BigInteger:new(y1:toString(), y1.sign)
-    if not r:equals(zero) then
+    if not r:equals(ZERO) then
       b=BigInteger:new(r:toString(), r.sign)
       x1=BigInteger:new(xn:toString(), xn.sign)
       y1=BigInteger:new(yn:toString(), yn.sign)
     end
-  until(r:equals(zero))
+  until(r:equals(ZERO))
 
   return b, x1, y1
 end
@@ -606,6 +613,140 @@ function BigInteger:inverse(num)
     return s:mod(num)
   end
   return t:mod(num)
+end
+
+--Use the Miller-Rabin test to determine if a number is probably prime
+function BigInteger:isProbablePrime(certainty)
+  --Ensure that n is an odd number
+  if self:mod(TWO):equals(ZERO) then return false end
+  
+  --All the working data
+  local temp=self:subtract(ONE)
+  local nMinus=self:subtract(ONE)
+  local exp, m, k, j=BigInteger.ZERO(), BigInteger.ZERO(), BigInteger.ZERO(), BigInteger.ONE()
+  local a, bBack, bNow
+  
+  --Determine k and m for n-1=(2^k)*m
+  while not(temp:equals(ONE)) do
+    temp=temp:divide(TWO)
+    exp=exp:add(ONE)
+    if nMinus:mod(TWO:pow(exp)):equals(ZERO) then
+      k=BigInteger:new(exp:toString(), '+')
+      m=nMinus:divide(TWO:pow(exp))
+    end
+  end
+  
+  for i=1, certainty do
+    --Choose a random 0 < a < n-1
+    a=nMinus:random()
+    
+    --Calculate the original b values
+    bBack=a:modPow(m, self)
+    if bBack:equals(ONE) or bBack:equals(nMinus) then return true end
+    
+    --Calculate the remaining b values
+    while j:lessThanOrEqualTo(k) do
+      bNow=bBack:modPow(TWO, self)
+      --If the b value is -1 (mod n) then n is prime
+      if bNow:equals(nMinus) then return true end
+      --Else compute the next b value
+      bBack=BigInteger:new(bNow:toString(), '+')
+      j=j:add(ONE)
+    end
+  end
+  return false
+end
+
+--Shift a BigInteger to the left bitwise
+function BigInteger:shiftLeft()
+  return self:multiply(TWO)
+end
+
+--Shift a BigInteger to the right bitwise
+function BigInteger:shiftRight()
+  local q, r=self:divide(TWO)
+  return q
+end
+
+--Return self and num bitwise
+function BigInteger:bitwiseAnd(num)
+  assert(type(num)=="table" and num.value~=nil and num.sign~=nil and num.sign=='+', "Invalid bitwise and " .. self:toString() .. ".")
+  local selfString, numString=self:toString(2), num:toString(2)
+  local selfLength, numLength=string.len(selfString), string.len(numString)
+  local currSelf, currNum=0, 0
+  
+  local length=math.min(selfLength, numLength)
+  local tempString=""
+  
+  for i=1, length do
+    currSelf=tonumber(string.sub(selfString, selfLength-i+1, selfLength-i+1))
+    currNum=tonumber(string.sub(numString, numLength-i+1, numLength-i+1))
+    if currSelf==1 and currNum==1 then tempString="1"..tempString else tempString="0"..tempString end
+  end
+  
+  return BigInteger:new(tempString, '+', 2)
+end
+
+--Return self or num bitwise
+function BigInteger:bitwiseOr(num)
+  assert(type(num)=="table" and num.value~=nil and num.sign~=nil and num.sign=='+', "Invalid bitwise and " .. self:toString() .. ".")
+  local selfString, numString=self:toString(2), num:toString(2)
+  local selfLength, numLength=string.len(selfString), string.len(numString)
+  local currSelf, currNum=0, 0
+  
+  local length=math.min(selfLength, numLength)
+  local tempString=""
+  
+  --Compare both strings
+  for i=1, length do
+    currSelf=tonumber(string.sub(selfString, selfLength-i+1, selfLength-i+1))
+    currNum=tonumber(string.sub(numString, numLength-i+1, numLength-i+1))
+    if currSelf==1 or currNum==1 then tempString="1"..tempString else tempString="0"..tempString end
+  end
+  
+  --Add the additional 1 and 0 from a longer string if necessary
+  for i=length+1, selfLength do
+    currSelf=tonumber(string.sub(selfString, selfLength-i+1, selfLength-i+1))
+    if currSelf==1 then tempString="1"..tempString else tempString="0"..tempString end
+  end
+  for i=length+1, numLength do
+    currNum=tonumber(string.sub(numString, numLength-i+1, numLength-i+1))
+    if currNum==1 then tempString="1"..tempString else tempString="0"..tempString end
+  end
+  
+  
+  return BigInteger:new(tempString, '+', 2)
+end
+
+--Return self xor bitwise
+function BigInteger:bitwiseXor(num)
+  assert(type(num)=="table" and num.value~=nil and num.sign~=nil and num.sign=='+', "Invalid bitwise and " .. self:toString() .. ".")
+  local selfString, numString=self:toString(2), num:toString(2)
+  local selfLength, numLength=string.len(selfString), string.len(numString)
+  local currSelf, currNum=0, 0
+  
+  local length=math.min(selfLength, numLength)
+  local tempString=""
+  
+  --Compare both strings
+  for i=1, length do
+    currSelf=tonumber(string.sub(selfString, selfLength-i+1, selfLength-i+1))
+    currNum=tonumber(string.sub(numString, numLength-i+1, numLength-i+1))
+    tempString=tostring((currSelf+currNum)%2)..tempString
+  end
+  
+  --Add the additional 1 and 0 from a longer string if necessary
+  for i=length+1, selfLength do
+    currSelf=tonumber(string.sub(selfString, selfLength-i+1, selfLength-i+1))
+    if currSelf==1 then tempString="1"..tempString else tempString="0"..tempString end
+  end
+  for i=length+1, numLength do
+    currNum=tonumber(string.sub(numString, numLength-i+1, numLength-i+1))
+    if currNum==1 then tempString="1"..tempString else tempString="0"..tempString end
+  end
+  
+  
+  return BigInteger:new(tempString, '+', 2)
 end
 
 --Return the BigInteger as a string
