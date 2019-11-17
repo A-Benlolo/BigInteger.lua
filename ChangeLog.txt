@@ -18,7 +18,10 @@ November 15, 2019
 *Added option to raise a BigInteger to a number or another BigInteger
 *Increased effeciency by replacing BigInteger.ZERO() calls with a local variable in some functions
 
-Future Plans
-============
-*Add function to determine if a number is a probable prime
-*Implement bitwise operations
+November 17, 2019
+=================
+*Added bitwise operations
+*Added function to use Miller-Rabin Primality test
+*Increased effeciency by using global variables for numbers 1-10
+*Added new features to demo
+*Changed demo to compute the value after printing what it is doing to demonstrate the operations that take a longer time
