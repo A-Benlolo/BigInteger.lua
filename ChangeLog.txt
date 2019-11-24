@@ -25,3 +25,10 @@ November 17, 2019
 *Increased effeciency by using global variables for numbers 1-10
 *Added new features to demo
 *Changed demo to compute the value after printing what it is doing to demonstrate the operations that take a longer time
+
+November 23, 2019
+=================
+*Slightly increased effeciency of Miller-Rabin Primality test
+*Added two's complement to print negative binary numbers
+*Added option to shift a specified amount left or right.
+*Updated the demo to implement the changes.
