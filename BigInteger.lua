@@ -1,6 +1,6 @@
 --A BigInteger class for arbitrarily long integers
 --Works well for integers up to ~3000 digits, but is somewhat slow beyond that
---Credit (Please don't remove): Alexander Benlolo ... November 17, 2019 ... abenlo1@students.towson.edu
+--Credit (Please don't remove): Alexander Benlolo ... November 23, 2019 ... abenlo1@towson.students.edu
 local BigInteger = {}
 local mt = {__index = BigInteger}
 
@@ -10,7 +10,7 @@ local function decimalToNewBase(num, b)
   assert(type(b)=="table" and b.value~=nil and b.sign~=nil and b:greaterThan(BigInteger.ONE()), "Invalid base.")
 
   local k, out, pos="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", ""
-  local temp=BigInteger:new(num:toString(), num.sign)
+  local temp=BigInteger:new(num:toString(), '+')
   local zero, one=BigInteger.ZERO(), BigInteger.ONE()
   while temp:greaterThan(zero) do
     temp, pos = temp:divide(b)
@@ -620,6 +620,15 @@ function BigInteger:isProbablePrime(certainty)
   --Ensure that n is an odd number
   if self:mod(TWO):equals(ZERO) then return false end
   
+  --Ensure the number  is not divisible by 5
+  if self.value[1]==0 or self.value[1]==5 then return false end
+  
+  local all=0
+  for i=1, #self.value do
+    all=all+self.value[i]
+  end
+  if all%3==0 then return false end
+  
   --All the working data
   local temp=self:subtract(ONE)
   local nMinus=self:subtract(ONE)
@@ -658,14 +667,25 @@ function BigInteger:isProbablePrime(certainty)
 end
 
 --Shift a BigInteger to the left bitwise
-function BigInteger:shiftLeft()
-  return self:multiply(TWO)
+function BigInteger:shiftLeft(positions)
+  assert(type(positions)=="number" and positions>0 and positions==positions//1, "Failed to shift "..self:toString().." left.")
+  
+  local temp=BigInteger:new(self:getValue(), set.sign)
+  
+  for i=1, positions do temp=temp:multiply(TWO) end
+  
+  return temp
 end
 
 --Shift a BigInteger to the right bitwise
-function BigInteger:shiftRight()
-  local q, r=self:divide(TWO)
-  return q
+function BigInteger:shiftRight(positions)
+  assert(type(positions)=="number" and positions>0 and positions==positions//1, "Failed to shift "..self:toString().." right.")
+  
+  local temp=BigInteger:new(self:getValue(), set.sign)
+  
+  for i=1, positions do temp=temp:divide(TWO) end
+  
+  return temp
 end
 
 --Return self and num bitwise
@@ -763,7 +783,28 @@ function BigInteger:toString(base)
 
   --Return the string either with no sign or a negative sign
   if self.sign == '-' then
-    return '-' .. asString
+    
+    --Change to two's compliments
+    if base==2 then
+      local length = string.len(asString)
+      local temp=""
+
+      --Flip the bits
+      for i=1, length do
+        if string.sub(asString, i ,i)=="1" then temp=temp.."0"
+        else temp=temp.."1" end
+      end
+      
+      --Convert to BigInteger to add one
+      temp=BigInteger:new(temp, '+', 2)
+      temp=temp:add(ONE)
+      
+      return temp:toString(2)
+      
+    --Or just return it with a negative sign
+    else
+      return '-' .. asString
+    end
   end
   return asString
 end
