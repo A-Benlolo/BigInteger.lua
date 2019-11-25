@@ -1,6 +1,6 @@
 --A BigInteger class for arbitrarily long integers
 --Works well for integers up to ~3000 digits, but is somewhat slow beyond that
---Credit (Please don't remove): Alexander Benlolo ... November 23, 2019 ... abenlo1@towson.students.edu
+--Credit (Please don't remove): Alexander Benlolo ... November 24, 2019 ... abenlo1@students.towson.edu
 local BigInteger = {}
 local mt = {__index = BigInteger}
 
@@ -467,7 +467,7 @@ function BigInteger:pow(num)
     while i<=num do raised=raised:multiply(self) ; i=i+1 end
     if self.sign=='-' and num%2==1 then raised.sign='-' end
   end
-  
+
   return raised
 end
 
@@ -617,24 +617,37 @@ end
 
 --Use the Miller-Rabin test to determine if a number is probably prime
 function BigInteger:isProbablePrime(certainty)
-  --Ensure that n is an odd number
-  if self:mod(TWO):equals(ZERO) then return false end
+  --Return true if the number=2, 3, 5
+  if self:equals(TWO) or self:equals(THREE) or self:equals(FIVE) then return true end
   
-  --Ensure the number  is not divisible by 5
-  if self.value[1]==0 or self.value[1]==5 then return false end
-  
-  local all=0
+  --Ensure the number is not divisible by 2
+  if self.value[1]%2==0 then return false end
+
+  --Ensure the number is not divisible by 3
+  local sumOfDigits, length=0, 0
+  local sumString=""
   for i=1, #self.value do
-    all=all+self.value[i]
+    sumOfDigits=sumOfDigits+self.value[i]
   end
-  if all%3==0 then return false end
-  
+  while sumOfDigits>=10 do
+    sumString=tostring(sumOfDigits)
+    sumOfDigits=0
+    length=string.len(sumString)
+    for i=1, length do
+      sumOfDigits=sumOfDigits+tonumber(string.sub(sumString, i, i))
+    end
+  end
+  if sumOfDigits%3==0 then return false end
+
+  --Ensure the number is not divisible by 5
+  if self.value[1]==0 or self.value[1]==5 then return false end
+
   --All the working data
   local temp=self:subtract(ONE)
   local nMinus=self:subtract(ONE)
   local exp, m, k, j=BigInteger.ZERO(), BigInteger.ZERO(), BigInteger.ZERO(), BigInteger.ONE()
   local a, bBack, bNow
-  
+
   --Determine k and m for n-1=(2^k)*m
   while not(temp:equals(ONE)) do
     temp=temp:divide(TWO)
@@ -644,15 +657,18 @@ function BigInteger:isProbablePrime(certainty)
       m=nMinus:divide(TWO:pow(exp))
     end
   end
-  
+
+  a=BigInteger.ONE()
   for i=1, certainty do
-    --Choose a random 0 < a < n-1
-    a=nMinus:random()
+    --Change the a
+    a=a:add(ONE)
+    
+    if a:greaterThanOrEqualTo(nMinus) then a=nMinus:random() end
     
     --Calculate the original b values
     bBack=a:modPow(m, self)
     if bBack:equals(ONE) or bBack:equals(nMinus) then return true end
-    
+
     --Calculate the remaining b values
     while j:lessThanOrEqualTo(k) do
       bNow=bBack:modPow(TWO, self)
@@ -669,22 +685,22 @@ end
 --Shift a BigInteger to the left bitwise
 function BigInteger:shiftLeft(positions)
   assert(type(positions)=="number" and positions>0 and positions==positions//1, "Failed to shift "..self:toString().." left.")
-  
+
   local temp=BigInteger:new(self:getValue(), set.sign)
-  
+
   for i=1, positions do temp=temp:multiply(TWO) end
-  
+
   return temp
 end
 
 --Shift a BigInteger to the right bitwise
 function BigInteger:shiftRight(positions)
   assert(type(positions)=="number" and positions>0 and positions==positions//1, "Failed to shift "..self:toString().." right.")
-  
+
   local temp=BigInteger:new(self:getValue(), set.sign)
-  
+
   for i=1, positions do temp=temp:divide(TWO) end
-  
+
   return temp
 end
 
@@ -694,16 +710,16 @@ function BigInteger:bitwiseAnd(num)
   local selfString, numString=self:toString(2), num:toString(2)
   local selfLength, numLength=string.len(selfString), string.len(numString)
   local currSelf, currNum=0, 0
-  
+
   local length=math.min(selfLength, numLength)
   local tempString=""
-  
+
   for i=1, length do
     currSelf=tonumber(string.sub(selfString, selfLength-i+1, selfLength-i+1))
     currNum=tonumber(string.sub(numString, numLength-i+1, numLength-i+1))
     if currSelf==1 and currNum==1 then tempString="1"..tempString else tempString="0"..tempString end
   end
-  
+
   return BigInteger:new(tempString, '+', 2)
 end
 
@@ -713,17 +729,17 @@ function BigInteger:bitwiseOr(num)
   local selfString, numString=self:toString(2), num:toString(2)
   local selfLength, numLength=string.len(selfString), string.len(numString)
   local currSelf, currNum=0, 0
-  
+
   local length=math.min(selfLength, numLength)
   local tempString=""
-  
+
   --Compare both strings
   for i=1, length do
     currSelf=tonumber(string.sub(selfString, selfLength-i+1, selfLength-i+1))
     currNum=tonumber(string.sub(numString, numLength-i+1, numLength-i+1))
     if currSelf==1 or currNum==1 then tempString="1"..tempString else tempString="0"..tempString end
   end
-  
+
   --Add the additional 1 and 0 from a longer string if necessary
   for i=length+1, selfLength do
     currSelf=tonumber(string.sub(selfString, selfLength-i+1, selfLength-i+1))
@@ -733,8 +749,8 @@ function BigInteger:bitwiseOr(num)
     currNum=tonumber(string.sub(numString, numLength-i+1, numLength-i+1))
     if currNum==1 then tempString="1"..tempString else tempString="0"..tempString end
   end
-  
-  
+
+
   return BigInteger:new(tempString, '+', 2)
 end
 
@@ -744,17 +760,17 @@ function BigInteger:bitwiseXor(num)
   local selfString, numString=self:toString(2), num:toString(2)
   local selfLength, numLength=string.len(selfString), string.len(numString)
   local currSelf, currNum=0, 0
-  
+
   local length=math.min(selfLength, numLength)
   local tempString=""
-  
+
   --Compare both strings
   for i=1, length do
     currSelf=tonumber(string.sub(selfString, selfLength-i+1, selfLength-i+1))
     currNum=tonumber(string.sub(numString, numLength-i+1, numLength-i+1))
     tempString=tostring((currSelf+currNum)%2)..tempString
   end
-  
+
   --Add the additional 1 and 0 from a longer string if necessary
   for i=length+1, selfLength do
     currSelf=tonumber(string.sub(selfString, selfLength-i+1, selfLength-i+1))
@@ -764,8 +780,8 @@ function BigInteger:bitwiseXor(num)
     currNum=tonumber(string.sub(numString, numLength-i+1, numLength-i+1))
     if currNum==1 then tempString="1"..tempString else tempString="0"..tempString end
   end
-  
-  
+
+
   return BigInteger:new(tempString, '+', 2)
 end
 
@@ -783,7 +799,7 @@ function BigInteger:toString(base)
 
   --Return the string either with no sign or a negative sign
   if self.sign == '-' then
-    
+
     --Change to two's compliments
     if base==2 then
       local length = string.len(asString)
@@ -794,14 +810,14 @@ function BigInteger:toString(base)
         if string.sub(asString, i ,i)=="1" then temp=temp.."0"
         else temp=temp.."1" end
       end
-      
+
       --Convert to BigInteger to add one
       temp=BigInteger:new(temp, '+', 2)
       temp=temp:add(ONE)
-      
+
       return temp:toString(2)
-      
-    --Or just return it with a negative sign
+
+      --Or just return it with a negative sign
     else
       return '-' .. asString
     end
