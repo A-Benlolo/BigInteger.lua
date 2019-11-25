@@ -32,3 +32,12 @@ November 23, 2019
 *Added two's complement to print negative binary numbers
 *Added option to shift a specified amount left or right.
 *Updated the demo to implement the changes.
+
+November 24, 2019
+=================
+*Recognize 2, 3, and 5 as prime numbers through primality test
+*Slightly increased effeciency of primality test
+
+Planned
+=======
+*Correct the comparison to properly determine which number is larger/smaller if both are negative... whoops!
