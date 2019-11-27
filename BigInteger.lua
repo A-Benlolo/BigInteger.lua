@@ -1,6 +1,6 @@
 --A BigInteger class for arbitrarily long integers
 --Works well for integers up to ~3000 digits, but is somewhat slow beyond that
---Credit (Please don't remove): Alexander Benlolo ... November 24, 2019 ... abenlo1@students.towson.edu
+--Credit (Please don't remove): Alexander Benlolo ... November 27, 2019 ... abenlo1@students.towson.edu
 local BigInteger = {}
 local mt = {__index = BigInteger}
 
@@ -167,9 +167,16 @@ function BigInteger:greaterThan(num)
   elseif #self.value < #num.value then return false end
 
   --Try to determine based on the digit from most to least significant
-  for i=#num.value, 1, -1 do
-    if self.value[i]>num.value[i] then return true
-    elseif self.value[i]<num.value[i] then return false end
+  if self.sign=='+' then
+    for i=#num.value, 1, -1 do
+      if self.value[i]>num.value[i] then return true
+      elseif self.value[i]<num.value[i] then return false end
+    end
+  else
+    for i=#num.value, 1, -1 do
+      if self.value[i]<num.value[i] then return true
+      elseif self.value[i]>num.value[i] then return false end
+    end
   end
 
   --If you got this far then the numbers are equal
@@ -186,9 +193,16 @@ function BigInteger:lessThan(num)
   elseif #self.value < #num.value then return true end
 
   --Try to determine based on the digit from most to least significant
-  for i=#num.value, 1, -1 do
-    if self.value[i]>num.value[i] then return false
-    elseif self.value[i]<num.value[i] then return true end
+  if self.sign=='+' then
+    for i=#num.value, 1, -1 do
+      if self.value[i]>num.value[i] then return false
+      elseif self.value[i]<num.value[i] then return true end
+    end
+  else
+    for i=#num.value, 1, -1 do
+      if self.value[i]<num.value[i] then return false
+      elseif self.value[i]>num.value[i] then return true end
+    end
   end
 
   --If you got this far then the numbers are equal
@@ -619,7 +633,7 @@ end
 function BigInteger:isProbablePrime(certainty)
   --Return true if the number=2, 3, 5
   if self:equals(TWO) or self:equals(THREE) or self:equals(FIVE) then return true end
-  
+
   --Ensure the number is not divisible by 2
   if self.value[1]%2==0 then return false end
 
@@ -662,9 +676,9 @@ function BigInteger:isProbablePrime(certainty)
   for i=1, certainty do
     --Change the a
     a=a:add(ONE)
-    
+
     if a:greaterThanOrEqualTo(nMinus) then a=nMinus:random() end
-    
+
     --Calculate the original b values
     bBack=a:modPow(m, self)
     if bBack:equals(ONE) or bBack:equals(nMinus) then return true end
