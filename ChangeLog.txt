@@ -38,6 +38,6 @@ November 24, 2019
 *Recognize 2, 3, and 5 as prime numbers through primality test
 *Slightly increased effeciency of primality test
 
-Planned
-=======
-*Correct the comparison to properly determine which number is larger/smaller if both are negative... whoops!
+November 27, 2019
+=================
+*Corrected the comparisons to properly determine which BigInteger is larger/smaller if both are negative
