@@ -1,0 +1,245 @@
+===========================================================================================
+
+Some notes:
+	-All operations return a new BigInteger
+	-All functions use the implied self syntax... "foo:function(passingData)"
+	-All passingData is required unless otherwise noted
+
+===========================================================================================
+
+BigInteger:new(num, s, base)
+	*Creates a new BigInteger with the data recieved
+
+	*num	- string; number you want to create
+	*s 	- character; sign of the number, +/-
+	*base	- number; the base of num. Can be 2-36. 10 is used by default
+
+===========================================================================================
+
+BigInteger:setValue(num)
+	*Sets the value of self to the received value
+	*Must be base 10, because I'm too lazy to fix it
+
+	*num	- string; number you want to create
+
+===========================================================================================
+
+BigInteger:setSign(s)
+	*Sets the sign of self to the received character
+
+	*s 	- character; sign of the number, +/-
+
+===========================================================================================
+
+BigInteger:getValue()
+	*Returns the value of self as a string
+
+===========================================================================================
+
+BigInteger:getSign()
+	*Returns the sign of self as a string
+
+===========================================================================================
+
+BigInteger:greaterThan(num)
+	*Determine if self is greater than num
+	*Returns a boolean value
+
+	*num	- BigInteger; What you want to compare self to
+
+===========================================================================================
+
+BigInteger:lessThan(num)
+	*Determine if self is less than num
+	*Returns a boolean value
+
+	*num	- BigInteger; What you want to compare self to
+
+===========================================================================================
+
+BigInteger:equals(num)
+	*Determine if self is equal to num
+	*Returns a boolean value
+
+	*num	- BigInteger; What you want to compare self to
+
+===========================================================================================
+
+BigInteger:greaterThanOrEqualTo(num)
+	*Determine if self is greater than or equal to num
+	*Returns a boolean value
+
+	*num	- BigInteger; What you want to compare self to
+
+===========================================================================================
+
+BigInteger:lessThanOrEqualTo(num)
+	*Determine if self is less than or equal to num
+	*Returns a boolean value
+
+	*num	- BigInteger; What you want to compare self to
+
+===========================================================================================
+
+BigInteger:add(num)
+	*Add num onto self
+	*Returns self+num
+
+	*num	- BigInteger; What you want to add to self
+
+===========================================================================================
+
+BigInteger:subtract(num)
+	*Subtract num from self
+	*Returns self-num
+
+	*num	- BigInteger; What you want to subtract from self
+
+===========================================================================================
+
+BigInteger:multiply(num)
+	*Multiplies self by num
+	*Returns self*num
+
+	*num	- BigInteger; What you want to multiply self by
+
+===========================================================================================
+
+BigInteger:divide(num)
+	*Divides self by num
+	*Returns self/num, (self-(self//num)*num)
+
+	*num	- BigInteger; What you want to divide self into. Cannot be zero
+
+===========================================================================================
+
+BigInteger:mod(num)
+	*Determine self modulo num... Remainder after division
+	*Returns self-(self//num)*num
+
+	*num	- BigInteger; What you want to modulo self by. Must be postive
+
+===========================================================================================
+
+BigInteger:pow(num)
+	*Determine self raised to the power num
+	*Returns self^num
+
+	*num	- BigInteger or number; What you want to raise self to. Cannot be negative
+
+===========================================================================================
+
+BigInteger:modPow(p, m)
+	*Determine self to the power p modulo m
+	*Returns self^p (mod m)
+
+	*p	- BigInteger; What you want to raise self to. Cannot be negative
+	*m	- BigInteger; What you want to do modulus by. Must be postive
+	
+===========================================================================================
+
+BigInteger:random()
+	*Choose some random number between 0 and self exclusively
+	*Returns rand so that 0 < rand < self
+
+===========================================================================================
+
+BigInteger:abs()
+	*Determine the absolute value of self
+	*Returns |self|	
+
+===========================================================================================
+
+BigInteger:max(num)
+	*Determine the maximum value between two BigIntegers
+	*Returns a copy of the larger BigInteger
+
+	*num	- BigInteger; What you want to compare self to
+
+===========================================================================================
+
+BigInteger:min(num)
+	*Determine the minimum value between two BigIntegers
+	*Returns a copy of the smaller BigInteger
+
+	*num	- BigInteger; What you want to compare self to
+
+===========================================================================================
+
+BigInteger:negate()
+	*Determine the negation of self
+	*Returns self*-1
+
+===========================================================================================
+
+BigInteger:euclidean(num)
+	*Determine the result after doing the Euclidean algorithim using self and num
+	*Returns gcd(self, num), s, t
+
+	*num	- BigInteger; What you want to do the Euclidean algorithim with
+
+===========================================================================================
+
+BigInteger:inverse(num)
+	*Determine the inverse of self modulo num
+	*Returns self^-1 (mod num)
+
+	*num	- BigInteger; What you want to do modulus by. Must be postive
+	
+===========================================================================================
+
+BigInteger:isProbablePrime(certainty)
+	*Use the Miller-Rabin test to determine if a number is probably prime
+	*Returns a boolean value
+
+	*certainty	- number; How many times to repeat the test using different numbers
+
+===========================================================================================
+
+BigInteger:shiftLeft(positions)
+	*Shift self left bitwise
+	*Returns self<<positions
+
+	*positions	- number; How many positions to shift self by
+
+===========================================================================================
+
+BigInteger:shiftRight(positions)
+	*Shift self right bitwise
+	*Returns self>>positions
+
+	*positions	- number; How many positions to shift self by
+
+===========================================================================================
+
+BigInteger:bitwiseAnd(num)
+	*Determine the result of doing self and num, bitwise
+	*Returns self & num
+
+	*num	- BigInteger; what you want to and self with
+
+===========================================================================================
+
+BigInteger:bitwiseOr(num)
+	*Determine the result of doing self or num, bitwise
+	*Returns self | num
+
+	*num	- BigInteger; what you want to or self with
+
+===========================================================================================
+
+BigInteger:bitwiseXor(num)
+	*Determine the result of doing self xor num, bitwise
+	*Returns self ~ num
+
+	*num	- BigInteger; what you want to xor self with
+
+===========================================================================================
+
+BigInteger:toString(base)
+	*Get self in a readable format in any base 2-36 inclusively
+	*Returns a string of self
+
+	*base	- number; the base of self you want. If not specified, base 10 is used
+
+===========================================================================================
