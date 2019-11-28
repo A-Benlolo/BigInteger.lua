@@ -41,3 +41,4 @@ November 24, 2019
 November 27, 2019
 =================
 *Corrected the comparisons to properly determine which BigInteger is larger/smaller if both are negative
+*Prevented possibility of division by zero
