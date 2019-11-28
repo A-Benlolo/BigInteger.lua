@@ -393,7 +393,7 @@ end
 
 --Divide this BigInteger by another BigInteger
 function BigInteger:divide(num)
-  assert(type(num)=="table" and num.value~=nil and num.sign~=nil, "Failed to divide " .. self:toString() .. ".")
+  assert(type(num)=="table" and num.value~=nil and num.sign~=nil and (not num:equals(ZERO)), "Failed to divide " .. self:toString() .. ".")
   local q, r=BigInteger:new("", '+'), BigInteger:new(self:toString(), '+')
   local numPlace=#self.value
   local workingVal=BigInteger:new(tostring(self.value[numPlace]), '+')
@@ -582,7 +582,7 @@ function BigInteger:negate()
 end
 
 --Return the results from the extended Euclidean algorithim
-function BigInteger:Euclidean(num)
+function BigInteger:euclidean(num)
   assert(type(num)=="table" and num.value~=nil and num.sign~=nil, "Failed to Euclidiate " .. self:toString() .. ".")
 
   --The working data
@@ -621,7 +621,7 @@ end
 function BigInteger:inverse(num)
   assert(type(num)=="table" and num.value~=nil and num.sign~=nil, "Failed to find inverse of " .. self:toString() .. ".")
 
-  local gcd, s, t=self:Euclidean(num)
+  local gcd, s, t=self:euclidean(num)
 
   if self:greaterThan(num) then
     return s:mod(num)
