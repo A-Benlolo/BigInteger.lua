@@ -129,7 +129,7 @@ local function main()
   io.write(",----------------,\n")
   io.write("|    EUCLIDEAN   |\n")
   io.write("`----------------`\n")
-  local gcd, s, t=absP:Euclidean(absQ)
+  local gcd, s, t=absP:euclidean(absQ)
   io.write(absP:toString(), "*", s:toString(), " + ", absQ:toString(), "*", t:toString(), " = ", absP:multiply(s):add(absQ:multiply(t)):toString(), "\n\n")
   
   io.write(",----------------,\n")

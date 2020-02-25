@@ -366,7 +366,7 @@ function BigInteger:multiply(num)
         carry=0
       end
       if curr.value[#curr.value]>=10 then
-        carry=(curr.value[#curr.value]-(curr.value[#curr.value]%10))//10
+        carry=math.floor((curr.value[#curr.value]-(curr.value[#curr.value]%10))/10)
         curr.value[#curr.value]=curr.value[#curr.value]%10
       end
     end
@@ -698,7 +698,7 @@ end
 
 --Shift a BigInteger to the left bitwise
 function BigInteger:shiftLeft(positions)
-  assert(type(positions)=="number" and positions>0 and positions==positions//1, "Failed to shift "..self:toString().." left.")
+  assert(type(positions)=="number" and positions>0 and positions==math.floor(positions), "Failed to shift "..self:toString().." left.")
 
   local temp=BigInteger:new(self:getValue(), set.sign)
 
@@ -709,7 +709,7 @@ end
 
 --Shift a BigInteger to the right bitwise
 function BigInteger:shiftRight(positions)
-  assert(type(positions)=="number" and positions>0 and positions==positions//1, "Failed to shift "..self:toString().." right.")
+  assert(type(positions)=="number" and positions>0 and positions==math.floor(positions), "Failed to shift "..self:toString().." right.")
 
   local temp=BigInteger:new(self:getValue(), set.sign)
 
